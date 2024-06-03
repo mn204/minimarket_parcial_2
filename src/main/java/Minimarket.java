@@ -30,7 +30,8 @@ public class Minimarket {
             Class.forName(JDBC_DRIVER);
 
             //Paso 2: Abrir una conexión
-            System.out.println("Conectándose a la base de datos...");
+            System.out.println("Incializando Minimarket Mitocondria........");
+            logger.info("Abriendo Minimarket");
             conn = DriverManager.getConnection(DB_URL,USER,PASS);
 
             //Paso 3: Trabajar con la tabla
@@ -42,9 +43,11 @@ public class Minimarket {
         } catch(SQLException se) {
             //administrar errores para JDBC
             se.printStackTrace();
+            logger.error(se.getMessage());
         } catch(Exception e) {
             //administrar errores para Class.forName
             e.printStackTrace();
+            logger.error(e.getMessage());
         } finally {
             try{
                 if(stmt!=null) stmt.close();
@@ -54,9 +57,12 @@ public class Minimarket {
                 if(conn!=null) conn.close();
             } catch(SQLException se){
                 se.printStackTrace();
+                logger.error(se.getMessage());
+
             }
         }
-        System.out.println("Goodbye!");
+        System.out.println("Cerrando Minimarket;");
+        logger.info("Cerrando Minimarket");
     }
 
     public static void menu() {
@@ -67,7 +73,7 @@ public class Minimarket {
             System.out.println("Menu Minimarket\t Empleado nro: ");
             System.out.println(SEPARADOR);
 
-            System.out.println("1- Mostrar Producto");
+            System.out.println("1- Vender Producto");
             System.out.println("2- Agregar Recurso Humano.");
             System.out.println("3- Agregar Ausente.");
             System.out.println("4- Agregar Familiar.");
@@ -99,17 +105,31 @@ public class Minimarket {
         }
     }
 
-    public void  menuProducto(){
-
-        System.out.println("Productos de la tienda:");
-        System.out.println(SEPARADOR);
-        mostrarTodosLosProductos();
-        System.out.println(SEPARADOR);
-        System.out.println("Elegir Producto:");
-        int opcionProducto = sc.nextInt();
+    public void  menuVenta(){
+        double precioVentaTotal;
+        Venta nuevaVenta = new Venta();
+        System.out.println("Ingrese Cliente:");
+        int clienteId = sc.nextInt();
         sc.nextLine();
-        System.out.println("Ingrese cantidad del producto:");
-        int cantidadProducto = sc.nextInt();
+        nuevaVenta.setCliente(new Cliente());
+        nuevaVenta.getCliente().setIdCliente(clienteId);
+
+        while(true) {
+            System.out.println(SEPARADOR);
+            mostrarTodosLosProductos();
+            System.out.println(SEPARADOR);
+            System.out.println("Elegir Producto:");
+            int opcionProducto = sc.nextInt();
+            sc.nextLine();
+            System.out.println("Ingrese cantidad del producto:");
+            int cantidadProducto = sc.nextInt();
+            sc.nextLine();
+            
+
+
+
+        }
+
 
 
     }
@@ -119,17 +139,18 @@ public class Minimarket {
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            System.out.println("ID | Nombre | Precio | Stock");
+            System.out.println("ID \tNombre \tPrecio \tStock");
             while (rs.next()) {
                 int idProducto = rs.getInt("idProducto");
                 String nombreProducto = rs.getString("nombreProducto");
                 double precioProducto = rs.getDouble("precioProducto");
                 int stockProducto = rs.getInt("stockProducto");
-                System.out.printf("%d | %s | %.2f | %d%n", idProducto, nombreProducto, precioProducto, stockProducto);
+                System.out.println( idProducto+"\t" + nombreProducto+"\t"  + precioProducto+"\t"  + stockProducto);
                 logger.info("Producto mostrado: ID=" + idProducto + ", Nombre=" + nombreProducto + ", Precio=" + precioProducto + ", Stock=" + stockProducto);
             }
         } catch (SQLException e) {
             System.out.println("Error al mostrar todos los productos: " + e.getMessage());
+
         }
     }
 
