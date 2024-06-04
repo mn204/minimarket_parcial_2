@@ -69,12 +69,15 @@ public class Minimarket {
 
     public static void menu() {
         boolean salida = false;
-
+        System.out.println("Seleccione el Empleado :(para hacerlo tipee el id del empleado)");
+        mostrarTodosLosEmpleados();
+        int idEmpleado = sc.nextInt();
+        sc.nextLine();
+        logger.info("Empleado logueado legajo: " + idEmpleado);
         while (!salida) {
             System.out.println(SEPARADOR);
-            System.out.println("Menu Minimarket\t Empleado nro: ");
+            System.out.println("Menu Minimarket Mitocondria         Empleado Legajo: "+ idEmpleado);
             System.out.println(SEPARADOR);
-
             System.out.println("1- Vender Producto");
             System.out.println("2- Agregar Recurso Humano.");
             System.out.println("3- Agregar Ausente.");
@@ -87,6 +90,7 @@ public class Minimarket {
             switch (entrada) {
                 case 1:
                     venderProducto();
+                    logger.info("Se ingreso al menu de ventas");
                     break;
                 case 2:
                     break;
@@ -96,7 +100,6 @@ public class Minimarket {
                     break;
                 case 5:
                     break;
-
                 case 6:
                     salida = true;
                     break;
@@ -105,7 +108,9 @@ public class Minimarket {
                     break;
             }
         }
+        logger.info("Empleado deslogueado legajo: "+ idEmpleado);
     }
+    //METODOS DE VENTA
     public static void venderProducto() {
         try {
             int idCliente;
@@ -251,11 +256,31 @@ public class Minimarket {
                 double precioProducto = rs.getDouble("precioProducto");
                 int stockProducto = rs.getInt("stockProducto");
                 System.out.printf("%-10d %-20s %-10.2f %-10d%n", idProducto, nombreProducto, precioProducto, stockProducto);
-                logger.info("Producto mostrado: ID=" + idProducto + ", Nombre=" + nombreProducto + ", Precio=" + precioProducto + ", Stock=" + stockProducto);
             }
         } catch (SQLException e) {
             System.out.println("Error al mostrar todos los productos: " + e.getMessage());
             logger.error("Error al mostrar todos los productos: " + e.getMessage());
+        }
+    }
+    //METODOS DE EMPLEADO
+
+    public static void mostrarTodosLosEmpleados() {
+        String sql = "SELECT idEmpleado, nombreEmpleado, apellidoEmpleado FROM Empleado";
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            System.out.printf("%-10s %-20s %-20s%n", "Legajo", "Nombre", "Apellido");
+            System.out.println(SEPARADOR);
+            while (rs.next()) {
+                int idEmpleado = rs.getInt("idEmpleado");
+                String nombreEmpleado = rs.getString("nombreEmpleado");
+                String apellidoEmpleado = rs.getString("apellidoEmpleado");
+                System.out.printf("%-10d %-20s %-20s%n", idEmpleado, nombreEmpleado, apellidoEmpleado);
+
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar todos los empleados: " + e.getMessage());
+            logger.error("Error al mostrar todos los empleados: " + e.getMessage());
         }
     }
 
