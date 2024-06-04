@@ -16,7 +16,7 @@ public class Minimarket {
     //static final String DB_URL = "jdbc:h2:~/h2/testdb";
     //static final String DB_URL = "jdbc:h2:mem:test"; <---- se crea en memoria, se va cuando termine el programa,
     //static final String DB_URL = "jdbc:h2:tcp://localhost/~/h2/test";
-    static final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
+    static final String DB_URL = "jdbc:h2:tcp://localhost/~/test2";
 
     //  Credenciales
     static final String USER = "sa";
@@ -67,7 +67,7 @@ public class Minimarket {
         logger.info("Cerrando Minimarket");
     }
 
-    public static void menu() {
+    public static void menu() throws SQLException {
         boolean salida = false;
         System.out.println("Seleccione el Empleado :(para hacerlo tipee el id del empleado)");
         mostrarTodosLosEmpleados();
@@ -79,10 +79,10 @@ public class Minimarket {
             System.out.println("Menu Minimarket Mitocondria         Empleado Legajo: "+ idEmpleado);
             System.out.println(SEPARADOR);
             System.out.println("1- Vender Producto");
-            System.out.println("2- Agregar Recurso Humano.");
+            System.out.println("2- Ingreso de mercadería");
             System.out.println("3- Agregar Ausente.");
             System.out.println("4- Agregar Familiar.");
-            System.out.println("5- Agregar Liquidación.");
+            System.out.println("5- Mostrar Prodructos");
             System.out.println("6- Salida.");
             System.out.println(SEPARADOR);
             int entrada = sc.nextInt();
@@ -93,12 +93,15 @@ public class Minimarket {
                     logger.info("Se ingreso al menu de ventas");
                     break;
                 case 2:
+                    ingresarMercaderia();
+                    logger.info("Se ingreso mercaderia al minimarket");
                     break;
                 case 3:
                     break;
                 case 4:
                     break;
                 case 5:
+                    mostrarTodosLosProductos();
                     break;
                 case 6:
                     salida = true;
@@ -109,6 +112,40 @@ public class Minimarket {
             }
         }
         logger.info("Empleado deslogueado legajo: "+ idEmpleado);
+    }
+    //Ingreso de mercadería
+    public static void ingresarMercaderia(){
+        try{
+            int idProveedor;
+            while (true) {
+                System.out.println("Ingrese el ID del Proveedor:");
+                idProveedor = sc.nextInt();
+                sc.nextLine();
+                if (proveedorExiste(idProveedor)) {
+                    break;
+                } else {
+                    System.out.println("Proveedor no encontrado. Intente nuevamente.");
+                }
+            }
+
+            mostrarTodosLosProductos();
+            System.out.println("Elegir Producto a Ingresar(ID):");
+            int idProducto = sc.nextInt();
+            sc.nextLine();
+            System.out.println("Ingrese cantidad del producto:");
+            int cantidadProducto = sc.nextInt();
+            sc.nextLine();
+
+            boolean rs = agregarStockProducto(idProducto, cantidadProducto);
+
+            if (rs){
+                System.out.println("Stock Actualizado");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al procesar la venta: " + e.getMessage());
+            logger.error("Error al intentar ingresar mercaderia: " + e.getMessage());
+        }
+
     }
     //METODOS DE VENTA
     public static void venderProducto() {
@@ -171,8 +208,29 @@ public class Minimarket {
         }
     }
 
+    private static boolean proveedorExiste(int idProveedor) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM PROVEEDOR WHERE IDPROVEEDOR = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idProveedor);
+            ResultSet rs = pstmt.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
+    }
+
     private static boolean actualizarStockProducto(int idProducto, int cantidad) throws SQLException {
         String sql = "UPDATE PRODUCTO SET STOCKPRODUCTO = STOCKPRODUCTO - ? WHERE IDPRODUCTO = ? AND STOCKPRODUCTO >= ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, cantidad);
+            pstmt.setInt(2, idProducto);
+            pstmt.setInt(3, cantidad);
+            int rowsUpdated = pstmt.executeUpdate();
+            return rowsUpdated > 0;
+        }
+    }
+
+    private static boolean agregarStockProducto(int idProducto, int cantidad) throws SQLException {
+        String sql = "UPDATE PRODUCTO SET STOCKPRODUCTO = STOCKPRODUCTO + ? WHERE IDPRODUCTO = ? AND STOCKPRODUCTO >= ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, cantidad);
             pstmt.setInt(2, idProducto);
