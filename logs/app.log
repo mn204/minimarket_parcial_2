@@ -1,0 +1,25 @@
+2024-06-04 11:37:59.271 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-04 11:38:21.225 [main] ERROR Minimarket - null
+2024-06-04 11:38:21.225 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-04 11:49:17.885 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-04 11:49:50.790 [main] INFO  Minimarket - Producto mostrado: ID=1, Nombre=Pan, Precio=1.5, Stock=100
+2024-06-04 11:49:50.806 [main] INFO  Minimarket - Producto mostrado: ID=2, Nombre=Leche, Precio=0.99, Stock=50
+2024-06-04 11:49:50.806 [main] INFO  Minimarket - Producto mostrado: ID=3, Nombre=Arroz, Precio=2.5, Stock=200
+2024-06-04 11:49:50.806 [main] INFO  Minimarket - Producto mostrado: ID=4, Nombre=Huevos, Precio=3.2, Stock=30
+2024-06-04 11:49:50.806 [main] INFO  Minimarket - Producto mostrado: ID=5, Nombre=Manzana, Precio=0.3, Stock=150
+2024-06-04 11:50:04.960 [main] INFO  Minimarket - Producto mostrado: ID=1, Nombre=Pan, Precio=1.5, Stock=100
+2024-06-04 11:50:04.960 [main] INFO  Minimarket - Producto mostrado: ID=2, Nombre=Leche, Precio=0.99, Stock=50
+2024-06-04 11:50:04.961 [main] INFO  Minimarket - Producto mostrado: ID=3, Nombre=Arroz, Precio=2.5, Stock=198
+2024-06-04 11:50:04.961 [main] INFO  Minimarket - Producto mostrado: ID=4, Nombre=Huevos, Precio=3.2, Stock=30
+2024-06-04 11:50:04.962 [main] INFO  Minimarket - Producto mostrado: ID=5, Nombre=Manzana, Precio=0.3, Stock=150
+2024-06-04 11:50:33.293 [main] INFO  Minimarket - Venta registrada: Cliente ID=41987534, Total=8.2
+2024-06-04 11:50:51.517 [main] ERROR Minimarket - Cannot invoke "java.sql.Statement.close()" because "Minimarket.stmt" is null
+2024-06-04 11:50:51.517 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-04 12:02:15.323 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-04 12:02:36.316 [main] INFO  Minimarket - Producto mostrado: ID=1, Nombre=Pan, Precio=1.5, Stock=100
+2024-06-04 12:02:36.316 [main] INFO  Minimarket - Producto mostrado: ID=2, Nombre=Leche, Precio=0.99, Stock=50
+2024-06-04 12:02:36.316 [main] INFO  Minimarket - Producto mostrado: ID=3, Nombre=Arroz, Precio=2.5, Stock=198
+2024-06-04 12:02:36.316 [main] INFO  Minimarket - Producto mostrado: ID=4, Nombre=Huevos, Precio=3.2, Stock=29
+2024-06-04 12:02:36.316 [main] INFO  Minimarket - Producto mostrado: ID=5, Nombre=Manzana, Precio=0.3, Stock=150
+2024-06-04 12:03:36.800 [main] ERROR Minimarket - null
+2024-06-04 12:03:36.805 [main] INFO  Minimarket - Cerrando Minimarket

@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.apache.logging.log4j.Logger;
@@ -84,7 +86,7 @@ public class Minimarket {
             sc.nextLine();
             switch (entrada) {
                 case 1:
-                    mostrarTodosLosProductos();
+                    venderProducto();
                     break;
                 case 2:
                     break;
@@ -104,48 +106,129 @@ public class Minimarket {
             }
         }
     }
+    public static void venderProducto() {
+        try {
+            int idCliente;
+            while (true) {
+                System.out.println("Ingrese el ID del Cliente:");
+                idCliente = sc.nextInt();
+                sc.nextLine();
+                if (clienteExiste(idCliente)) {
+                    break;
+                } else {
+                    System.out.println("Cliente no encontrado. Intente nuevamente.");
+                }
+            }
 
-    public void  menuVenta(){
-        double precioVentaTotal;
-        Venta nuevaVenta = new Venta();
-        System.out.println("Ingrese Cliente:");
-        int clienteId = sc.nextInt();
-        sc.nextLine();
-        nuevaVenta.setCliente(new Cliente());
-        nuevaVenta.getCliente().setIdCliente(clienteId);
+            List<int[]> productosComprados = new ArrayList<>();
+            double precioVentaTotal = 0.0;
+            boolean agregarOtroProducto = true;
 
-        while(true) {
-            System.out.println(SEPARADOR);
-            mostrarTodosLosProductos();
-            System.out.println(SEPARADOR);
-            System.out.println("Elegir Producto:");
-            int opcionProducto = sc.nextInt();
-            sc.nextLine();
-            System.out.println("Ingrese cantidad del producto:");
-            int cantidadProducto = sc.nextInt();
-            sc.nextLine();
-            
+            while (agregarOtroProducto) {
+                mostrarTodosLosProductos();
+                System.out.println("Elegir Producto (ID):");
+                int idProducto = sc.nextInt();
+                sc.nextLine();
+                System.out.println("Ingrese cantidad del producto:");
+                int cantidadProducto = sc.nextInt();
+                sc.nextLine();
 
+                if (actualizarStockProducto(idProducto, cantidadProducto)) {
+                    productosComprados.add(new int[]{idProducto, cantidadProducto});
+                    precioVentaTotal += obtenerPrecioProducto(idProducto) * cantidadProducto;
+                } else {
+                    System.out.println("Stock insuficiente para el producto seleccionado.");
+                }
 
+                System.out.println("¿Desea agregar otro producto? (S/N):");
+                String respuesta = sc.nextLine();
+                if (!respuesta.equalsIgnoreCase("S")) {
+                    agregarOtroProducto = false;
+                }
+            }
 
+            registrarVenta(idCliente, precioVentaTotal, productosComprados);
+        } catch (SQLException e) {
+            System.out.println("Error al procesar la venta: " + e.getMessage());
+            logger.error("Error al procesar la venta: " + e.getMessage());
         }
-
-
-
     }
+
+    private static boolean clienteExiste(int idCliente) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM CLIENTE WHERE IDCLIENTE = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idCliente);
+            ResultSet rs = pstmt.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
+    }
+
+    private static boolean actualizarStockProducto(int idProducto, int cantidad) throws SQLException {
+        String sql = "UPDATE PRODUCTO SET STOCKPRODUCTO = STOCKPRODUCTO - ? WHERE IDPRODUCTO = ? AND STOCKPRODUCTO >= ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, cantidad);
+            pstmt.setInt(2, idProducto);
+            pstmt.setInt(3, cantidad);
+            int rowsUpdated = pstmt.executeUpdate();
+            return rowsUpdated > 0;
+        }
+    }
+
+    private static double obtenerPrecioProducto(int idProducto) throws SQLException {
+        String sql = "SELECT PRECIOPRODUCTO FROM PRODUCTO WHERE IDPRODUCTO = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idProducto);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("PRECIOPRODUCTO");
+            } else {
+                throw new SQLException("Producto no encontrado.");
+            }
+        }
+    }
+
+    private static void registrarVenta(int idCliente, double precioTotal, List<int[]> productosComprados) throws SQLException {
+        String sqlVenta = "INSERT INTO VENTA (IDCLIENTE, PRECIOVENTATOTAL, FECHAVENTA) VALUES (?, ?, CURRENT_DATE)";
+        String sqlVentaProducto = "INSERT INTO VENTAPRODUCTO (IDVENTA, IDPRODUCTO, CANTIDADVENDIDA) VALUES (?, ?, ?)";
+
+        try (PreparedStatement pstmtVenta = conn.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pstmtVentaProducto = conn.prepareStatement(sqlVentaProducto)) {
+
+            pstmtVenta.setInt(1, idCliente);
+            pstmtVenta.setDouble(2, precioTotal);
+            pstmtVenta.executeUpdate();
+
+            ResultSet generatedKeys = pstmtVenta.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int idVenta = generatedKeys.getInt(1);
+
+                for (int[] producto : productosComprados) {
+                    pstmtVentaProducto.setInt(1, idVenta);
+                    pstmtVentaProducto.setInt(2, producto[0]);
+                    pstmtVentaProducto.setInt(3, producto[1]);
+                    pstmtVentaProducto.executeUpdate();
+                }
+            }
+        }
+        System.out.println("Venta registrada exitosamente. Precio Total: " + precioTotal);
+        logger.info("Venta registrada: Cliente ID=" + idCliente + ", Total=" + precioTotal);
+    }
+
+
 
     public static void mostrarTodosLosProductos() {
         String sql = "SELECT idProducto, nombreProducto, precioProducto, stockProducto FROM Producto";
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            System.out.println("ID \tNombre \tPrecio \tStock");
+            System.out.println("ID \t\tNombre \t\tPrecio \t\tStock");
             while (rs.next()) {
                 int idProducto = rs.getInt("idProducto");
                 String nombreProducto = rs.getString("nombreProducto");
                 double precioProducto = rs.getDouble("precioProducto");
                 int stockProducto = rs.getInt("stockProducto");
-                System.out.println( idProducto+"\t" + nombreProducto+"\t"  + precioProducto+"\t"  + stockProducto);
+                System.out.println( idProducto+"\t\t" + nombreProducto+"\t\t"  + precioProducto+"\t\t"  + stockProducto);
                 logger.info("Producto mostrado: ID=" + idProducto + ", Nombre=" + nombreProducto + ", Precio=" + precioProducto + ", Stock=" + stockProducto);
             }
         } catch (SQLException e) {
