@@ -243,20 +243,22 @@ public class Minimarket {
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            System.out.println("ID \t\tNombre \t\tPrecio \t\tStock");
+            System.out.printf("%-10s %-20s %-10s %-10s%n", "ID", "Nombre", "Precio", "Stock");
+            System.out.println(SEPARADOR);
             while (rs.next()) {
                 int idProducto = rs.getInt("idProducto");
                 String nombreProducto = rs.getString("nombreProducto");
                 double precioProducto = rs.getDouble("precioProducto");
                 int stockProducto = rs.getInt("stockProducto");
-                System.out.println( idProducto+"\t\t" + nombreProducto+"\t\t"  + precioProducto+"\t\t"  + stockProducto);
+                System.out.printf("%-10d %-20s %-10.2f %-10d%n", idProducto, nombreProducto, precioProducto, stockProducto);
                 logger.info("Producto mostrado: ID=" + idProducto + ", Nombre=" + nombreProducto + ", Precio=" + precioProducto + ", Stock=" + stockProducto);
             }
         } catch (SQLException e) {
             System.out.println("Error al mostrar todos los productos: " + e.getMessage());
-
+            logger.error("Error al mostrar todos los productos: " + e.getMessage());
         }
     }
+
 
 }
 

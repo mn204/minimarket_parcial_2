@@ -1,0 +1,8 @@
+2024-06-04 14:12:10.659 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-04 14:12:29.153 [main] INFO  Minimarket - Producto mostrado: ID=1, Nombre=Pan, Precio=1.5, Stock=99
+2024-06-04 14:12:29.153 [main] INFO  Minimarket - Producto mostrado: ID=2, Nombre=Leche, Precio=1.0, Stock=48
+2024-06-04 14:12:29.169 [main] INFO  Minimarket - Producto mostrado: ID=3, Nombre=Arroz, Precio=2.5, Stock=196
+2024-06-04 14:12:29.169 [main] INFO  Minimarket - Producto mostrado: ID=4, Nombre=Huevos, Precio=3.2, Stock=29
+2024-06-04 14:12:29.169 [main] INFO  Minimarket - Producto mostrado: ID=5, Nombre=Manzana, Precio=0.3, Stock=150
+2024-06-04 14:13:48.622 [main] ERROR Minimarket - null
+2024-06-04 14:13:48.622 [main] INFO  Minimarket - Cerrando Minimarket
