@@ -146,7 +146,9 @@ public class Minimarket {
                     agregarOtroProducto = false;
                 }
             }
-
+            if (clienteHabitual(idCliente)){
+                precioVentaTotal = precioVentaTotal * 0.95;
+            }
             registrarVenta(idCliente, precioVentaTotal, productosComprados);
         } catch (SQLException e) {
             System.out.println("Error al procesar la venta: " + e.getMessage());
@@ -188,12 +190,31 @@ public class Minimarket {
         }
     }
 
+    private static boolean clienteHabitual(int idCliente) throws SQLException {
+        String sql = "SELECT CANTIDADCOMPRASCLIENTE FROM CLIENTE WHERE IDCLIENTE = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idCliente);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                int cantidadCompras = rs.getInt("CANTIDADCOMPRASCLIENTE");
+                return cantidadCompras >= 5;
+            } else {
+                return false; // Client not found or no cantidadCompraCliente set
+            }
+        }
+    }
+
     private static void registrarVenta(int idCliente, double precioTotal, List<int[]> productosComprados) throws SQLException {
         String sqlVenta = "INSERT INTO VENTA (IDCLIENTE, PRECIOVENTATOTAL, FECHAVENTA) VALUES (?, ?, CURRENT_DATE)";
+        String sqlUpdateCliente = "UPDATE CLIENTE SET CANTIDADCOMPRASCLIENTE = CANTIDADCOMPRASCLIENTE + 1 WHERE IDCLIENTE = ?";
         String sqlVentaProducto = "INSERT INTO VENTAPRODUCTO (IDVENTA, IDPRODUCTO, CANTIDADVENDIDA) VALUES (?, ?, ?)";
 
         try (PreparedStatement pstmtVenta = conn.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement pstmtCliente = conn.prepareStatement(sqlUpdateCliente);
              PreparedStatement pstmtVentaProducto = conn.prepareStatement(sqlVentaProducto)) {
+
+            pstmtCliente.setInt(1, idCliente);
+            pstmtCliente.executeUpdate();
 
             pstmtVenta.setInt(1, idCliente);
             pstmtVenta.setDouble(2, precioTotal);
