@@ -81,7 +81,7 @@ public class Minimarket {
             System.out.println("1- Vender Producto");
             System.out.println("2- Ingreso de mercadería");
             System.out.println("3- Agregar Ausente.");
-            System.out.println("4- Agregar Familiar.");
+            System.out.println("4- Consultar Ventas.");
             System.out.println("5- Mostrar Prodructos");
             System.out.println("6- Salida.");
             System.out.println(SEPARADOR);
@@ -99,6 +99,7 @@ public class Minimarket {
                 case 3:
                     break;
                 case 4:
+                    consultarVentas();
                     break;
                 case 5:
                     mostrarTodosLosProductos();
@@ -112,6 +113,28 @@ public class Minimarket {
             }
         }
         logger.info("Empleado deslogueado legajo: "+ idEmpleado);
+    }
+    //Consultar Ventas
+    public static void consultarVentas(){
+        try{
+            System.out.println(SEPARADOR);
+            System.out.println("1 - Diaria");
+            System.out.println("2 - Mensual");
+            System.out.println(SEPARADOR);
+            while (true){
+                System.out.println("Elija que desa consultar:");
+                int opcionConsulta = sc.nextInt();
+                sc.nextLine();
+                if (opcionConsulta == 1 || opcionConsulta == 2){
+                    mostrarVentas(opcionConsulta);
+                    break;
+                }else {
+                    System.out.println("Opcion no valida");
+                }
+            }
+        }catch(SQLException e){
+            System.out.println(e);
+        }
     }
     //Ingreso de mercadería
     public static void ingresarMercaderia(){
@@ -240,6 +263,32 @@ public class Minimarket {
         }
     }
 
+    private static void mostrarVentas(int opcion) throws SQLException {
+        String sql;
+        if (opcion == 1) {
+            sql = "SELECT * FROM VENTA WHERE DAY(FECHAVENTA) = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                System.out.println("Ingrese el día que desea consultar");
+                int diaConsulta = sc.nextInt();
+                sc.nextLine();
+                pstmt.setInt(1, diaConsulta);
+                mostrarConsultaVentasFiltrado(pstmt);
+            }
+        } else if (opcion == 2) {
+            sql = "SELECT * FROM VENTA WHERE MONTH(FECHAVENTA) = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                System.out.println("Ingrese el mes que desea consultar");
+                int mesConsulta = sc.nextInt();
+                sc.nextLine();
+                pstmt.setInt(1, mesConsulta);
+                mostrarConsultaVentasFiltrado(pstmt);
+            }
+        } else {
+            throw new IllegalArgumentException("Opción no válida");
+        }
+    }
+
+
     private static double obtenerPrecioProducto(int idProducto) throws SQLException {
         String sql = "SELECT PRECIOPRODUCTO FROM PRODUCTO WHERE IDPRODUCTO = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -299,7 +348,26 @@ public class Minimarket {
         logger.info("Venta registrada: Cliente ID=" + idCliente + ", Total=" + precioTotal);
     }
 
+    private static void mostrarConsultaVentasFiltrado(PreparedStatement pstmt) throws SQLException {
+        ResultSet rs = pstmt.executeQuery();
+        System.out.printf("%-10s %-12s %-14s %-10s%n", "Id Venta", "Id Cliente", "Precio Total", "Fecha");
+        System.out.println(SEPARADOR);
+        boolean hasResults = false;
+        while (rs.next()) {
+            hasResults = true;
+            int idVenta = rs.getInt("IDVENTA");
+            String idcliente = rs.getString("IDCLIENTE");
+            String precioVentaTotal = rs.getString("PRECIOVENTATOTAL");
+            Date fechaVenta = rs.getDate("FECHAVENTA");
+            String fechaVentaStr = (fechaVenta != null) ? fechaVenta.toString() : "null";
 
+            System.out.printf("%-10d %-12s %-14s %-20s%n", idVenta, idcliente, precioVentaTotal, fechaVentaStr);
+        }
+
+        if (!hasResults) {
+            System.out.println("No se encontraron ventas para el dia especificado.");
+        }
+    }
 
     public static void mostrarTodosLosProductos() {
         String sql = "SELECT idProducto, nombreProducto, precioProducto, stockProducto FROM Producto";
