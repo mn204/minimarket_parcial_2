@@ -1,0 +1,8 @@
+2024-06-05 16:35:09.069 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 16:35:15.778 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 16:35:59.110 [main] INFO  Minimarket - Se ingreso mercaderia al minimarket
+2024-06-05 16:38:03.417 [main] INFO  Minimarket - Venta registrada: Cliente ID=41987534, Total=30.0
+2024-06-05 16:38:03.417 [main] INFO  Minimarket - Se ingreso al menu de ventas
+2024-06-05 16:46:57.458 [main] INFO  Minimarket - Empleado deslogueado legajo: 342
+2024-06-05 16:46:57.458 [main] ERROR Minimarket - Cannot invoke "java.sql.Statement.close()" because "Minimarket.stmt" is null
+2024-06-05 16:46:57.458 [main] INFO  Minimarket - Cerrando Minimarket

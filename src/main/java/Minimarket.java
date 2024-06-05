@@ -16,7 +16,7 @@ public class Minimarket {
     //static final String DB_URL = "jdbc:h2:~/h2/testdb";
     //static final String DB_URL = "jdbc:h2:mem:test"; <---- se crea en memoria, se va cuando termine el programa,
     //static final String DB_URL = "jdbc:h2:tcp://localhost/~/h2/test";
-    static final String DB_URL = "jdbc:h2:tcp://localhost/~/test2";
+    static final String DB_URL = "jdbc:h2:tcp://localhost/~/test";
 
     //  Credenciales
     static final String USER = "sa";
@@ -80,10 +80,14 @@ public class Minimarket {
             System.out.println(SEPARADOR);
             System.out.println("1- Vender Producto");
             System.out.println("2- Ingreso de mercadería");
-            System.out.println("3- Agregar Ausente.");
-            System.out.println("4- Consultar Ventas.");
+            System.out.println("3- Pago a un Proveedpr");
+            System.out.println("4- Consultar Ventas(diarias/mensuales)");
             System.out.println("5- Mostrar Prodructos");
-            System.out.println("6- Salida.");
+            System.out.println("6- Solicitar Comanda a Cocina");
+            System.out.println("7- Pagar Cuenta");
+            System.out.println("8- Estadisticas de platos mas pedidos");
+            System.out.println("9- Salida.");
+
             System.out.println(SEPARADOR);
             int entrada = sc.nextInt();
             sc.nextLine();
@@ -122,7 +126,7 @@ public class Minimarket {
             System.out.println("2 - Mensual");
             System.out.println(SEPARADOR);
             while (true){
-                System.out.println("Elija que desa consultar:");
+                System.out.println("Elija que desea consultar:");
                 int opcionConsulta = sc.nextInt();
                 sc.nextLine();
                 if (opcionConsulta == 1 || opcionConsulta == 2){
