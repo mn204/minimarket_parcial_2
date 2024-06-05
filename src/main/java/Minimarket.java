@@ -80,7 +80,7 @@ public class Minimarket {
             System.out.println(SEPARADOR);
             System.out.println("1- Vender Producto");
             System.out.println("2- Ingreso de mercadería");
-            System.out.println("3- Pago a un Proveedpr");
+            System.out.println("3- Pago a un Proveedor");
             System.out.println("4- Consultar Ventas(diarias/mensuales)");
             System.out.println("5- Mostrar Prodructos");
             System.out.println("6- Solicitar Comanda a Cocina");
@@ -101,14 +101,22 @@ public class Minimarket {
                     logger.info("Se ingreso mercaderia al minimarket");
                     break;
                 case 3:
+                    menuProveedor();
                     break;
                 case 4:
                     consultarVentas();
+                    logger.info("Se consultaron las ventas del minimarket");
                     break;
                 case 5:
                     mostrarTodosLosProductos();
                     break;
                 case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                case 9:
                     salida = true;
                     break;
                 default:
@@ -164,9 +172,22 @@ public class Minimarket {
             sc.nextLine();
 
             boolean rs = agregarStockProducto(idProducto, cantidadProducto);
-
+            ResultSet rsProducto;
+            double precioProducto = 0;
             if (rs){
                 System.out.println("Stock Actualizado");
+                System.out.println("Ingrese el id para el cupon de pago");
+                int idCupon = sc.nextInt();
+                sc.nextLine();
+                String sql = "SELECT PRECIOPRODUCTO FROM PRODUCTO WHERE IDPRODUCTO = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setInt(1, idProducto);
+                    rsProducto = pstmt.executeQuery();
+                    if(rsProducto.next()){
+                        precioProducto = rsProducto.getDouble("PRECIOPRODUCTO");
+                    }
+                }
+                generarCuponPago(idCupon, precioProducto * cantidadProducto, idProveedor);
             }
         } catch (SQLException e) {
             System.out.println("Error al procesar la venta: " + e.getMessage());
@@ -174,6 +195,27 @@ public class Minimarket {
         }
 
     }
+
+    //Generar Cupon de Pago
+    private static void generarCuponPago(int idPago, double costoTotal, int idProveedor){
+        String sql = "INSERT INTO PAGOMERCADERIA (IDPAGOMERCADERIA, COSTOTOTALMERCADERIA, FECHADEPAGOMERCADERIA, ESTAPAGADO, PROVEEDOR_IDPROVEEDOR) VALUES (?, ?, CURRENT_DATE, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPago);
+            pstmt.setDouble(2, costoTotal);
+            pstmt.setBoolean(3, false);
+            pstmt.setInt(4, idProveedor);
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println(SEPARADOR);
+                System.out.println("Se genero el Cupon de pago correctamente");
+            } else {
+                System.out.println("No se pudo insertar la fila.");
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+
     //METODOS DE VENTA
     public static void venderProducto() {
         try {
@@ -257,11 +299,10 @@ public class Minimarket {
     }
 
     private static boolean agregarStockProducto(int idProducto, int cantidad) throws SQLException {
-        String sql = "UPDATE PRODUCTO SET STOCKPRODUCTO = STOCKPRODUCTO + ? WHERE IDPRODUCTO = ? AND STOCKPRODUCTO >= ?";
+        String sql = "UPDATE PRODUCTO SET STOCKPRODUCTO = STOCKPRODUCTO + ? WHERE IDPRODUCTO = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, cantidad);
             pstmt.setInt(2, idProducto);
-            pstmt.setInt(3, cantidad);
             int rowsUpdated = pstmt.executeUpdate();
             return rowsUpdated > 0;
         }
@@ -270,21 +311,29 @@ public class Minimarket {
     private static void mostrarVentas(int opcion) throws SQLException {
         String sql;
         if (opcion == 1) {
-            sql = "SELECT * FROM VENTA WHERE DAY(FECHAVENTA) = ?";
+            sql = "SELECT * FROM VENTA WHERE DAY(FECHAVENTA) = ? AND MONTH(FECHAVENTA) = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 System.out.println("Ingrese el día que desea consultar");
                 int diaConsulta = sc.nextInt();
                 sc.nextLine();
+                System.out.println("Ingrese el mes que desea consultar");
+                int mesConsulta = sc.nextInt();
+                sc.nextLine();
                 pstmt.setInt(1, diaConsulta);
+                pstmt.setInt(2, mesConsulta);
                 mostrarConsultaVentasFiltrado(pstmt);
             }
         } else if (opcion == 2) {
-            sql = "SELECT * FROM VENTA WHERE MONTH(FECHAVENTA) = ?";
+            sql = "SELECT * FROM VENTA WHERE MONTH(FECHAVENTA) = ? AND YEAR(FECHAVENTA) = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 System.out.println("Ingrese el mes que desea consultar");
                 int mesConsulta = sc.nextInt();
                 sc.nextLine();
+                System.out.println("Ingrese el anio que desea consultar");
+                int anioConsulta = sc.nextInt();
+                sc.nextLine();
                 pstmt.setInt(1, mesConsulta);
+                pstmt.setInt(2, anioConsulta);
                 mostrarConsultaVentasFiltrado(pstmt);
             }
         } else {
@@ -413,7 +462,94 @@ public class Minimarket {
             logger.error("Error al mostrar todos los empleados: " + e.getMessage());
         }
     }
+    //METODOS DE PROVEEDOR
+    public static void menuProveedor(){
 
+        boolean salir = false;
+
+        while (!salir) {
+            System.out.println(SEPARADOR);
+            System.out.println("Menu de Pago Proveedores:");
+            System.out.println("1. Mostrar Pagos Pendientes");
+            System.out.println("2. Realizar Pago");
+            System.out.println("3. Salir");
+            System.out.print("Ingrese su opción: ");
+            int opcion = sc.nextInt();
+
+            switch (opcion) {
+                case 1:
+                    mostrarPagosPendientes();
+                    break;
+                case 2:
+                    realizarPagoProveedor();
+                    break;
+                case 3:
+                    salir = true;
+
+                    break;
+                default:
+                    System.out.println("Opción no válida. Intente nuevamente.");
+            }
+        }
+    }
+    // METODOS PARA PAGO A PROVEEDORES
+
+    public static void mostrarPagosPendientes() {
+        String sql = "SELECT * FROM PAGOMERCADERIA WHERE ESTAPAGADO = FALSE";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery();
+            System.out.println("Pagos Pendientes:");
+            System.out.println("ID Pago  | Costo Total | Fecha de Pago | Proveedor     ");
+            System.out.println(SEPARADOR);
+            while (rs.next()) {
+                int idPago = rs.getInt("IDPAGOMERCADERIA");
+                double costoTotal = rs.getDouble("COSTOTOTALMERCADERIA");
+                Date fechaPago = rs.getDate("FECHADEPAGOMERCADERIA");
+                int idProveedor = rs.getInt("PROVEEDOR_IDPROVEEDOR");
+                String nombreProveedor = obtenerNombreProveedor(idProveedor);
+                System.out.printf("%-8d | %11.2f | %-12tF | %-12s%n", idPago, costoTotal, fechaPago, nombreProveedor);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar pagos pendientes: " + e.getMessage());
+        }
+    }
+
+    private static String obtenerNombreProveedor(int idProveedor) {
+        String sql = "SELECT RAZONSOCIALPROVEEDOR   FROM PROVEEDOR WHERE IDPROVEEDOR = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, idProveedor);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("RAZONSOCIALPROVEEDOR");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener nombre del proveedor: " + e.getMessage());
+        }
+        return "Proveedor Desconocido";
+    }
+
+    public static void realizarPagoProveedor() {
+        mostrarPagosPendientes();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Ingrese el ID del pago que desea pagar:");
+        int idPago = sc.nextInt();
+        sc.nextLine();
+
+        String sql = "UPDATE PAGOMERCADERIA SET ESTAPAGADO = TRUE WHERE IDPAGOMERCADERIA = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, idPago);
+            int rowsUpdated = pstmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Pago marcado como pagado exitosamente.");
+            } else {
+                System.out.println("No se encontró ningún pago con el ID especificado.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al marcar el pago como pagado: " + e.getMessage());
+        }
+    }
 
 }
-

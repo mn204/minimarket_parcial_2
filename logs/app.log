@@ -6,3 +6,54 @@
 2024-06-05 16:46:57.458 [main] INFO  Minimarket - Empleado deslogueado legajo: 342
 2024-06-05 16:46:57.458 [main] ERROR Minimarket - Cannot invoke "java.sql.Statement.close()" because "Minimarket.stmt" is null
 2024-06-05 16:46:57.458 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 17:13:15.255 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 17:13:20.041 [main] INFO  Minimarket - Empleado logueado legajo: 543
+2024-06-05 17:15:37.754 [main] ERROR Minimarket - null
+2024-06-05 17:15:48.099 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 17:15:53.673 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 17:18:07.596 [main] ERROR Minimarket - null
+2024-06-05 17:18:07.603 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 17:18:13.424 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 17:18:19.197 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 17:19:54.920 [main] ERROR Minimarket - null
+2024-06-05 17:19:54.924 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 17:20:00.132 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 17:20:05.049 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 17:22:53.746 [main] ERROR Minimarket - null
+2024-06-05 17:22:59.054 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 17:23:03.702 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 17:26:04.465 [main] INFO  Minimarket - Venta registrada: Cliente ID=41987534, Total=28.5
+2024-06-05 17:26:04.465 [main] INFO  Minimarket - Se ingreso al menu de ventas
+2024-06-05 17:26:26.630 [main] ERROR Minimarket - null
+2024-06-05 17:26:26.634 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 18:19:56.498 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 18:19:56.999 [main] ERROR Minimarket - Error al mostrar todos los empleados: Table "EMPLEADO" not found (this database is empty); SQL statement:
+SELECT idEmpleado, nombreEmpleado, apellidoEmpleado FROM Empleado [42104-224]
+2024-06-05 18:20:20.350 [main] ERROR Minimarket - null
+2024-06-05 18:20:20.388 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 18:20:51.366 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 18:20:55.834 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 18:21:23.075 [main] INFO  Minimarket - Se ingreso mercaderia al minimarket
+2024-06-05 18:21:48.324 [main] INFO  Minimarket - Se ingreso mercaderia al minimarket
+2024-06-05 18:22:27.767 [main] ERROR Minimarket - null
+2024-06-05 18:22:27.772 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 18:32:47.158 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 18:32:52.595 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 18:33:03.443 [main] ERROR Minimarket - null
+2024-06-05 18:33:03.451 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 18:33:23.410 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 18:33:29.284 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 18:33:40.853 [main] ERROR Minimarket - null
+2024-06-05 18:33:40.857 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 18:34:00.454 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 18:34:08.219 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 18:35:19.058 [main] INFO  Minimarket - Empleado deslogueado legajo: 342
+2024-06-05 18:35:19.058 [main] ERROR Minimarket - Cannot invoke "java.sql.Statement.close()" because "Minimarket.stmt" is null
+2024-06-05 18:35:19.058 [main] INFO  Minimarket - Cerrando Minimarket
+2024-06-05 18:36:39.176 [main] INFO  Minimarket - Abriendo Minimarket
+2024-06-05 18:36:46.008 [main] INFO  Minimarket - Empleado logueado legajo: 342
+2024-06-05 18:36:58.103 [main] INFO  Minimarket - Se consultaron las ventas del minimarket
+2024-06-05 18:37:25.438 [main] INFO  Minimarket - Se consultaron las ventas del minimarket
+2024-06-05 18:38:11.171 [main] INFO  Minimarket - Empleado deslogueado legajo: 342
+2024-06-05 18:38:11.171 [main] ERROR Minimarket - Cannot invoke "java.sql.Statement.close()" because "Minimarket.stmt" is null
+2024-06-05 18:38:11.171 [main] INFO  Minimarket - Cerrando Minimarket
