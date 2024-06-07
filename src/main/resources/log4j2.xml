@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <Configuration status="INFO">
     <Appenders>
         <File name="file" fileName="logs/app.log">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </File>
+        <SMTP name="Mail1"
+              subject="Log Error Notification"
+              to="manuel.rodriguez@alumnos.frm.utn.edu.ar"
+              from="manuel.rodriguez@alumnos.frm.utn.edu.ar"
+              smtpHost="smtp.frm.utn.edu.ar"
+              smtpPort="25"
+              smtpUsername="manuel.rodriguez@alumnos.frm.utn.edu.ar"
+              smtpPassword="d42669675"
+              smtpProtocol="smtp">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <ThresholdFilter level="ERROR"/>
+        </SMTP>
     </Appenders>
-
     <Loggers>
+        <Logger name="JobStatus2" level="debug" additivity="false">
+            <AppenderRef ref="Mail1"/>
+        </Logger>
         <Root level="info">
-            <AppenderRef ref="file" />
+            <AppenderRef ref="file"/>
+            <AppenderRef ref="Mail1"/>
         </Root>
     </Loggers>
 </Configuration>

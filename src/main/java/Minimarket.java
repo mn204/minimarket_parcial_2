@@ -10,6 +10,7 @@ public class Minimarket {
     static final String SEPARADOR = "---------------------------------------------------------";
     static Scanner sc = new Scanner(System.in);
     private static final Logger logger = LogManager.getLogger(Minimarket.class);
+    private static final Logger jslogger = LogManager.getLogger(Minimarket.class);
     // driver JDBC y URL de la BD
     static final String JDBC_DRIVER = "org.h2.Driver";
     //static final String DB_URL = "jdbc:h2:~/testdb";
@@ -34,6 +35,7 @@ public class Minimarket {
             //Paso 2: Abrir una conexión
             System.out.println("Incializando Minimarket Mitocondria........");
             logger.info("Abriendo Minimarket");
+            jslogger.info("Abriendo Minimarket");
             conn = DriverManager.getConnection(DB_URL,USER,PASS);
 
             //Paso 3: Trabajar con la tabla
@@ -82,7 +84,7 @@ public class Minimarket {
             System.out.println("2- Ingreso de mercadería");
             System.out.println("3- Pago a un Proveedor");
             System.out.println("4- Consultar Ventas(diarias/mensuales)");
-            System.out.println("5- Mostrar Prodructos");
+            System.out.println("5- Mostrar Balance");
             System.out.println("6- Solicitar Comanda a Cocina");
             System.out.println("7- Pagar Cuenta");
             System.out.println("8- Estadisticas de platos mas pedidos");
@@ -102,19 +104,28 @@ public class Minimarket {
                     break;
                 case 3:
                     menuProveedor();
+                    logger.info("Se ingresa a pago de proveedores");
                     break;
                 case 4:
                     consultarVentas();
                     logger.info("Se consultaron las ventas del minimarket");
                     break;
                 case 5:
-                    mostrarTodosLosProductos();
+                    mostrarBalance();
+                    logger.info("Se mostro el balance");
                     break;
                 case 6:
+                    crearComanda();
+                    logger.info("Se solicita una comanda");
                     break;
                 case 7:
+                    mostrarComandasImpagas();
+                    pagarComanda();
+                    logger.info("Se paga una cuenta.");
                     break;
                 case 8:
+                    mostrarPlatosMasPedidos();
+                    logger.info("Se muestran estadisticas de plato");
                     break;
                 case 9:
                     salida = true;
@@ -125,6 +136,99 @@ public class Minimarket {
             }
         }
         logger.info("Empleado deslogueado legajo: "+ idEmpleado);
+    }
+    //Salida
+    public static void salida(){
+
+    }
+    //Mostrar Balance
+    public static void mostrarBalance() throws SQLException {
+        System.out.println("Ventas");
+        System.out.println(SEPARADOR);
+        mostrarVentas();
+        System.out.println(SEPARADOR);
+        System.out.println("Comandas");
+        System.out.println(SEPARADOR);
+        mostrarComandas();
+        System.out.println(SEPARADOR);
+        mostrarPagosPendientes();
+        System.out.println(SEPARADOR);
+        try{
+            System.out.println("Ganancias totales: "+calcularGanancias());
+            System.out.println("Gastos totales: "+calcularPerdidas());
+            System.out.println("Balance: "+ (calcularGanancias()-calcularPerdidas()));
+            logger.info("Se muestra el balance");
+        }catch (SQLException e){
+            System.out.println("Error: "+ e.getMessage());
+            logger.error(e.getMessage());
+        }
+
+    }
+    //Pagar Comanda
+    public static void pagarComanda(){
+        try{
+            System.out.println("Ingresar ID de la Comanda:");
+            int idComanda = sc.nextInt();
+            sc.nextLine();
+            String sql = "UPDATE COMANDA SET COMANDAPAGADO = TRUE WHERE IDCOMANDA = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, idComanda);
+            int pagar = pstmt.executeUpdate();
+            if (pagar > 0){
+                System.out.println("Comanda paga correctamente");
+            }else{
+                System.out.println("Error al pagar la comanda");
+            }
+        }catch (SQLException e){
+            System.out.println("Error al pagar la comanda:" + e.getMessage());
+            logger.error(e.getMessage());
+        }
+
+
+    }
+    //Crear Comanda
+    public static void crearComanda(){
+        try {
+            System.out.println("Ingresar ID de la Comanda:");
+            int idComanda = sc.nextInt();
+            sc.nextLine();
+
+            List<int[]> comidaComanda = new ArrayList<>();
+            double precioComandaTotal = 0.0;
+            boolean agregarOtroPlato = true;
+
+            while (agregarOtroPlato) {
+                mostrarTodosLosPlatos();
+                System.out.println("Elegir el Plato (ID):");
+                int idPlato = sc.nextInt();
+                sc.nextLine();
+                System.out.println("Ingrese cantidad del plato:");
+                int cantidadPlato = sc.nextInt();
+                sc.nextLine();
+
+                comidaComanda.add(new int[]{idPlato, cantidadPlato});
+                precioComandaTotal += obtenerPrecioPlato(idPlato) * cantidadPlato;
+
+                System.out.println("¿Desea agregar otro plato? (S/N):");
+                String respuesta = sc.nextLine();
+                if (!respuesta.equalsIgnoreCase("S")) {
+                    agregarOtroPlato = false;
+                }
+            }
+            System.out.println("Ingresar la Mesa:");
+            int mesa = sc.nextInt();
+            sc.nextLine();
+            registrarComanda(idComanda, mesa, precioComandaTotal);
+            logger.info("Se registra comanda: id: " +  idComanda + " Mesa: " + mesa + " Preciototal: " + precioComandaTotal );
+            for (int[] ints : comidaComanda) {
+                if (agregarPlatoComanda(idComanda, ints[0], ints[1])){
+                    System.out.println("Plato agregado a la comanda");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al procesar la venta: " + e.getMessage());
+            logger.error("Error al procesar la venta: " + e.getMessage());
+        }
     }
     //Consultar Ventas
     public static void consultarVentas(){
@@ -138,7 +242,7 @@ public class Minimarket {
                 int opcionConsulta = sc.nextInt();
                 sc.nextLine();
                 if (opcionConsulta == 1 || opcionConsulta == 2){
-                    mostrarVentas(opcionConsulta);
+                    mostrarVentasFiltrada(opcionConsulta);
                     break;
                 }else {
                     System.out.println("Opcion no valida");
@@ -308,7 +412,62 @@ public class Minimarket {
         }
     }
 
-    private static void mostrarVentas(int opcion) throws SQLException {
+    private static double calcularGanancias() throws SQLException {
+        String sqlVentas = "SELECT PRECIOVENTATOTAL FROM VENTA";
+        String sqlComandas = "SELECT PRECIOCOMANDA FROM COMANDA";
+        PreparedStatement pstmtVentas = conn.prepareStatement(sqlVentas);
+        PreparedStatement pstmtComandas = conn.prepareStatement(sqlComandas);
+        ResultSet rsVentas = pstmtVentas.executeQuery();
+        ResultSet rsComandas = pstmtComandas.executeQuery();
+        double gananciaTotal = 0;
+        while (rsComandas.next()){
+            double precioComanda = rsComandas.getDouble("PRECIOCOMANDA");
+            gananciaTotal += precioComanda;
+        }
+        while (rsVentas.next()){
+            double percioVenta = rsVentas.getDouble("PRECIOVENTATOTAL");
+            gananciaTotal += percioVenta;
+        }
+        return gananciaTotal;
+    }
+
+    private static double calcularPerdidas() throws SQLException {
+        String sql = "SELECT COSTOTOTALMERCADERIA FROM PAGOMERCADERIA";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        ResultSet rs = pstmt.executeQuery();
+        double perdidasTotales = 0;
+        while (rs.next()){
+            double precioPago = rs.getDouble("COSTOTOTALMERCADERIA");
+            perdidasTotales += precioPago;
+        }
+        return perdidasTotales;
+    }
+
+    private static void mostrarVentas() throws SQLException {
+        String sql = "SELECT * FROM VENTA ";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            System.out.printf("%-10s %-12s %-14s %-10s%n", "Id Venta", "Id Cliente", "Precio Total", "Fecha");
+            System.out.println(SEPARADOR);
+            boolean hasResults = false;
+            while (rs.next()) {
+                hasResults = true;
+                int idVenta = rs.getInt("IDVENTA");
+                String idcliente = rs.getString("IDCLIENTE");
+                String precioVentaTotal = rs.getString("PRECIOVENTATOTAL");
+                Date fechaVenta = rs.getDate("FECHAVENTA");
+                String fechaVentaStr = (fechaVenta != null) ? fechaVenta.toString() : "null";
+
+                System.out.printf("%-10d %-12s %-14s %-20s%n", idVenta, idcliente, precioVentaTotal, fechaVentaStr);
+            }
+
+            if (!hasResults) {
+                System.out.println("No se encontraron ventas para el dia especificado.");
+            }
+        }
+    }
+
+    private static void mostrarVentasFiltrada(int opcion) throws SQLException {
         String sql;
         if (opcion == 1) {
             sql = "SELECT * FROM VENTA WHERE DAY(FECHAVENTA) = ? AND MONTH(FECHAVENTA) = ?";
@@ -341,6 +500,18 @@ public class Minimarket {
         }
     }
 
+    private static double obtenerPrecioPlato(int idProducto) throws SQLException {
+        String sql = "SELECT PRECIOPLATO FROM PLATO WHERE IDPLATO = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idProducto);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("PRECIOPLATO");
+            } else {
+                throw new SQLException("Producto no encontrado.");
+            }
+        }
+    }
 
     private static double obtenerPrecioProducto(int idProducto) throws SQLException {
         String sql = "SELECT PRECIOPRODUCTO FROM PRODUCTO WHERE IDPRODUCTO = ?";
@@ -366,6 +537,79 @@ public class Minimarket {
             } else {
                 return false; // Client not found or no cantidadCompraCliente set
             }
+        }
+    }
+
+    private static boolean agregarPlatoComanda(int idComanda, int idPlato, int cantidadPlato) throws SQLException{
+        String sql = "INSERT INTO PLATOSENCOMANDA  (IDPLATO, IDCOMANDA, CANTIDADDEPLATOS) VALUES (?, ?, ?)";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, idPlato);
+        pstmt.setInt(2, idComanda);
+        pstmt.setInt(3, cantidadPlato);
+        int rs = pstmt.executeUpdate();
+        if (rs > 0){
+            return true;
+        }else{
+            System.out.println("No se pudo agregar el plato a la comanda");
+            return false;
+        }
+    }
+
+    private static void mostrarComandas() throws SQLException{
+        String sql = "SELECT * FROM COMANDA";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        System.out.printf("%-10s %-12s %-14s %-10s%n", "Id Comanda", "Mesa", "Fecha", "Precio");
+        System.out.println(SEPARADOR);
+        boolean hasResults = false;
+        while (rs.next()) {
+            hasResults = true;
+            int idComana = rs.getInt("IDCOMANDA");
+            String mesa = rs.getString("COMANDAMESA");
+            Date fechaComanda = rs.getDate("FECHACOMANDA");
+            double precioComanda = rs.getDouble("PRECIOCOMANDA");
+
+            System.out.printf("%-10d %-12s %-14s %-20s%n", idComana, mesa, fechaComanda, precioComanda);
+        }
+
+        if (!hasResults) {
+            System.out.println("No se encontraron ventas para el dia especificado.");
+        }
+    }
+
+    private static void mostrarComandasImpagas() throws SQLException{
+        String sql = "SELECT * FROM COMANDA WHERE COMANDAPAGADO = FALSE";
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(sql);
+        System.out.printf("%-10s %-12s %-14s %-10s%n", "Id Comanda", "Mesa", "Fecha", "Precio");
+        boolean hasResults = false;
+        while (rs.next()) {
+            hasResults = true;
+            int idComana = rs.getInt("IDCOMANDA");
+            String mesa = rs.getString("COMANDAMESA");
+            Date fechaComanda = rs.getDate("FECHACOMANDA");
+            double precioComanda = rs.getDouble("PRECIOCOMANDA");
+
+            System.out.printf("%-10d %-12s %-14s %-20s%n", idComana, mesa, fechaComanda, precioComanda);
+        }
+
+        if (!hasResults) {
+            System.out.println("No se encontraron ventas para el dia especificado.");
+        }
+    }
+
+    private static void registrarComanda(int idComanda,int mesa,double precioComandaTotal) throws SQLException {
+        String sql = "INSERT INTO COMANDA (IDCOMANDA, COMANDAMESA, FECHACOMANDA, PRECIOCOMANDA, COMANDAPAGADO) VALUES (?, ?, CURRENT_DATE, ?, ?)";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, idComanda);
+        pstmt.setInt(2, mesa);
+        pstmt.setDouble(3, precioComandaTotal);
+        pstmt.setBoolean(4, false);
+        int rs = pstmt.executeUpdate();
+        if (rs > 0){
+            System.out.println("Comanda Creada");
+        }else{
+            System.out.println("No se pudo crear la comanda");
         }
     }
 
@@ -441,6 +685,25 @@ public class Minimarket {
             logger.error("Error al mostrar todos los productos: " + e.getMessage());
         }
     }
+
+    public static void mostrarTodosLosPlatos() {
+        String sql = "SELECT * FROM PLATO";
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            System.out.printf("%-10s %-22s %-10s%n", "ID", "Nombre", "Precio");
+            System.out.println(SEPARADOR);
+            while (rs.next()) {
+                int idProducto = rs.getInt("IDPLATO");
+                String nombreProducto = rs.getString("NOMBREPLATO");
+                double precioProducto = rs.getDouble("PRECIOPLATO");
+                System.out.printf("%-10s %-22s %-10s%n", idProducto, nombreProducto, precioProducto);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar todos los productos: " + e.getMessage());
+            logger.error("Error al mostrar todos los productos: " + e.getMessage());
+        }
+    }
     //METODOS DE EMPLEADO
 
     public static void mostrarTodosLosEmpleados() {
@@ -478,6 +741,7 @@ public class Minimarket {
 
             switch (opcion) {
                 case 1:
+                    System.out.println("Pendientes:");
                     mostrarPagosPendientes();
                     break;
                 case 2:
@@ -499,7 +763,8 @@ public class Minimarket {
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             ResultSet rs = pstmt.executeQuery();
-            System.out.println("Pagos Pendientes:");
+            System.out.println("Pagos Proveedores:");
+            System.out.println(SEPARADOR);
             System.out.println("ID Pago  | Costo Total | Fecha de Pago | Proveedor     ");
             System.out.println(SEPARADOR);
             while (rs.next()) {
@@ -531,6 +796,7 @@ public class Minimarket {
     }
 
     public static void realizarPagoProveedor() {
+
         mostrarPagosPendientes();
         Scanner sc = new Scanner(System.in);
         System.out.println("Ingrese el ID del pago que desea pagar:");
@@ -549,6 +815,32 @@ public class Minimarket {
             }
         } catch (SQLException e) {
             System.out.println("Error al marcar el pago como pagado: " + e.getMessage());
+            logger.error(e.getMessage());
+        }
+    }
+
+    public static void mostrarPlatosMasPedidos() {
+        String sql = "SELECT p.NOMBREPLATO AS Plato, SUM(pc.CANTIDADDEPLATOS) AS Cantidad_Pedidos " +
+                "FROM PLATOSENCOMANDA pc " +
+                "JOIN PLATO p ON pc.IDPLATO = p.IDPLATO " +
+                "GROUP BY p.NOMBREPLATO " +
+                "ORDER BY Cantidad_Pedidos DESC";
+
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.println("Platos más pedidos:");
+            System.out.println(SEPARADOR);
+            while (rs.next()) {
+                String plato = rs.getString("Plato");
+                int cantidadPedidos = rs.getInt("Cantidad_Pedidos");
+                System.out.println(plato + ": " + cantidadPedidos);
+                logger.info("Cantidad del plato:" + plato + ": " + cantidadPedidos);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
