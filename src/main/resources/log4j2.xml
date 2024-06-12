@@ -11,7 +11,7 @@
               smtpHost="smtp.frm.utn.edu.ar"
               smtpPort="25"
               smtpUsername="manuel.rodriguez@alumnos.frm.utn.edu.ar"
-              smtpPassword="d42669675"
+              smtpPassword=""
               smtpProtocol="smtp">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
             <ThresholdFilter level="ERROR"/>
