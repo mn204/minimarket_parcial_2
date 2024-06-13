@@ -5,16 +5,16 @@
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
         </File>
         <SMTP name="Mail1"
-              subject="Log Error Notification"
-              to="manuel.rodriguez@alumnos.frm.utn.edu.ar"
+              subject="Info Minimarket grupo Rodriguez"
+              to="jmonetti@frm.utn.edu.ar"
               from="manuel.rodriguez@alumnos.frm.utn.edu.ar"
-              smtpHost="smtp.frm.utn.edu.ar"
+              smtpHost="smtp.alumnos.frm.utn.edu.ar"
               smtpPort="25"
               smtpUsername="manuel.rodriguez@alumnos.frm.utn.edu.ar"
               smtpPassword="d42669675"
               smtpProtocol="smtp">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-            <ThresholdFilter level="ERROR"/>
+            <ThresholdFilter level="INFO"/>
         </SMTP>
     </Appenders>
     <Loggers>
